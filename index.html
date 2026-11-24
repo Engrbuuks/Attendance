@@ -78,7 +78,11 @@ button{cursor:pointer}
 @media (max-width:940px){.grid{grid-template-columns:minmax(0,1fr)}}
 .grid>*{min-width:0}
 @media (max-width:640px){
-  .sync{padding:0 10px;max-width:44vw}
+  .sync{padding:0 10px;max-width:40vw;font-size:.75rem}
+  .title h1{font-size:1.1rem !important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #chips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px}
+  .chip{flex:none}
+  .toolbar .btn{padding:7px 10px;font-size:.8rem}
   .days{gap:8px}
   .day{flex:0 0 112px;flex-direction:column;align-items:flex-start;gap:6px;padding:10px;border-radius:16px}
   .day .num{width:30px;height:30px;border-radius:10px;font-size:.85rem}
@@ -133,6 +137,22 @@ mark{background:#ffe27a;color:#1c2a1a;border-radius:3px;padding:0 1px}
 .st.p[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:#fff}
 .st.l[aria-pressed="true"]{background:var(--orange);border-color:var(--orange);color:#fff}
 .st.a[aria-pressed="true"]{background:var(--maroon);border-color:var(--maroon);color:#fff}
+.modes{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:4px;gap:4px;margin-bottom:12px}
+.modes button{border:none;background:none;border-radius:10px;padding:7px 16px;font-weight:600;font-size:.85rem;color:var(--muted);display:inline-flex;gap:6px;align-items:center}
+.modes button svg{width:16px;height:16px}
+.modes button[aria-pressed="true"]{background:var(--green-deep);color:#fff}
+.modes button[data-mode="out"][aria-pressed="true"]{background:var(--maroon)}
+.edit{border:none;background:none;color:var(--muted);padding:2px 4px;margin-left:4px;border-radius:6px;vertical-align:-3px;opacity:.6}
+.edit svg{width:15px;height:15px}
+.row:hover .edit,.edit:focus-visible{opacity:1}
+.edit:hover{color:var(--green-ink);background:var(--surface-2)}
+.st.o[aria-pressed="true"]{background:var(--green-deep);border-color:var(--green-deep);color:#fff}
+.st:disabled{opacity:.35;cursor:default}
+.st{white-space:nowrap}
+.row.out{background:var(--surface-2)}
+.row.out .av{opacity:.7}
+.recent em.ev-out{color:var(--maroon)}
+@media (max-width:560px){.st.o{flex:1}}
 .pills{display:flex;gap:6px;flex-wrap:wrap}
 .row.wide{grid-template-columns:auto 1fr}
 .row.wide .pills{grid-column:1/-1}
@@ -228,6 +248,10 @@ dialog input{width:100%;border:1px solid var(--line);background:var(--surface-2)
 
   <div class="grid">
     <main class="panel">
+      <div class="modes" id="modeSwitch" role="group" aria-label="Mode">
+        <button data-mode="in" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4M15 16l4-4-4-4M19 12H8"/></svg>Sign in</button>
+        <button data-mode="out" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M9 16l-4-4 4-4M5 12h11"/></svg>Sign out</button>
+      </div>
       <div class="search">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
         <input id="q" type="search" placeholder="Search name, phone, email or number…" autocomplete="off" aria-label="Search candidates">
@@ -239,6 +263,7 @@ dialog input{width:100%;border:1px solid var(--line);background:var(--surface-2)
       <div class="toolbar">
         <button class="btn primary" id="addBtn" data-day-only><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add walk-in</button>
         <button class="btn" id="restAbsentBtn" data-day-only>Mark unmarked absent</button>
+        <button class="btn" id="allOutBtn" data-day-only>Sign out everyone still in</button>
         <span class="spacer"></span>
         <button class="btn" id="csvBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg>CSV</button>
         <button class="btn" id="printBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2M8 14h8v7H8z"/></svg>Print</button>
@@ -263,7 +288,7 @@ dialog input{width:100%;border:1px solid var(--line);background:var(--surface-2)
       </section>
 
       <section class="panel" id="recentPanel">
-        <h2>Recent check-ins</h2>
+        <h2>Recent activity</h2>
         <ul class="recent" id="recent"></ul>
       </section>
 
@@ -293,6 +318,19 @@ dialog input{width:100%;border:1px solid var(--line);background:var(--surface-2)
   </form>
 </dialog>
 
+<dialog id="edit">
+  <form method="dialog">
+    <h3 id="eTitle">Correct details</h3>
+    <label>Full name<input id="eName" required></label>
+    <label>Phone<input id="ePhone" inputmode="tel"></label>
+    <label>Email<input id="eEmail" type="email"></label>
+    <p class="hint">The change is saved to the Sheet and shows on every device.</p>
+    <div class="dlg-actions">
+      <button class="btn" value="cancel" formnovalidate>Cancel</button>
+      <button class="btn primary" value="ok">Save changes</button>
+    </div>
+  </form>
+</dialog>
 <dialog id="conn">
   <form method="dialog">
     <h3>Connect to your attendance Sheet</h3>
@@ -344,9 +382,12 @@ function newOp(o){ return {...o, id: store.deviceId+"-"+Date.now()+"-"+(opSeq++)
 function applyOp(op){
   if (op.type==="mark"){
     const m = store.days[op.day] ||= {};
-    if (op.s) m[op.pid] = {s:op.s, t:op.t, u:op.u}; else delete m[op.pid];
+    if (op.s) m[op.pid] = {s:op.s, t:op.t, o:op.o||0, u:op.u}; else delete m[op.pid];
   } else if (op.type==="person"){
     if (!store.people.some(p=>p.id===op.id)) store.people.push({id:op.id, name:op.name, phone:op.phone, email:op.email, walkIn:true});
+  } else if (op.type==="edit"){
+    const p = store.people.find(x=>x.id===op.pid);
+    if (p){ p.name=op.name; p.phone=op.phone; p.email=op.email; }
   } else if (op.type==="setting"){
     store.settings[op.k] = op.k==="dates" ? JSON.parse(op.v) : op.v;
   }
@@ -355,7 +396,7 @@ function queue(ops){
   [].concat(ops).forEach(o=>{ const op=newOp(o); applyOp(op); store.outbox.push(op); });
   save(); scheduleSync(400);
 }
-const markOp = (day,pid,s,t) => ({type:"mark", day, pid, s:s||"", t:t||Date.now(), dev:store.deviceId});
+const markOp = (day,pid,s,t,o) => ({type:"mark", day, pid, s:s||"", t:t||Date.now(), o:(s&&s!=="absent"&&o)||0, dev:store.deviceId});
 
 /* ---------- sync ---------- */
 let syncing=false, syncError=null, syncTimer=null;
@@ -366,7 +407,7 @@ function setServerState(d){
     .concat(d.walkins.map(w=>({...w, walkIn:true})));
   store.people = people;
   const days = {};
-  d.marks.forEach(m=>{ (days[m.day] ||= {})[m.pid] = {s:m.s, t:m.t, u:m.u}; });
+  d.marks.forEach(m=>{ (days[m.day] ||= {})[m.pid] = {s:m.s, t:m.t, o:m.o||0, u:m.u}; });
   store.days = days;
   for (const [k,{v}] of Object.entries(d.settings||{})){
     try { store.settings[k] = k==="dates" ? JSON.parse(v) : v; } catch(e){}
@@ -499,25 +540,54 @@ function isLateNow(){
   return n.getHours()*60+n.getMinutes() > h*60+m;
 }
 
+const isIn = r => r && (r.s==="present" || r.s==="late");
 function setStatus(id, status, manual){
   const day = tab, prev = marks(day)[id] ? {...marks(day)[id]} : null;
   if (status==="present" && !manual && isLateNow()) status="late";
-  queue(markOp(day, id, status));
+  // switching between Present and Late keeps the original times
+  const keep = isIn(prev) && (status==="present" || status==="late");
+  queue(markOp(day, id, status, keep ? prev.t : 0, keep ? prev.o : 0));
   render(id);
   const p = people().find(x=>x.id===id);
-  lastUndo = ()=>{ queue(markOp(day, id, prev?.s, prev?.t)); render(); };
+  lastUndo = ()=>{ queue(markOp(day, id, prev?.s, prev?.t, prev?.o)); render(); };
   toast(`${p.name} ${({present:"marked present",late:"marked late",absent:"marked absent"})[status]||"unmarked"} for ${dayName(day)}`);
 }
+function signOut(id){
+  const day = tab, r = marks(day)[id], p = people().find(x=>x.id===id);
+  if (!isIn(r)) return toast(`${p.name} hasn’t signed in for ${dayName(day)} yet`);
+  const prev = {...r};
+  if (r.o){ queue(markOp(day, id, r.s, r.t, 0)); lastUndo = ()=>{ queue(markOp(day,id,prev.s,prev.t,prev.o)); render(); }; render(id); return toast(`${p.name}’s sign-out removed`); }
+  queue(markOp(day, id, r.s, r.t, Date.now()));
+  lastUndo = ()=>{ queue(markOp(day,id,prev.s,prev.t,0)); render(); };
+  render(id);
+  toast(`${p.name} signed out at ${fmtTime(Date.now())}`);
+}
+let mode = "in";
+function setMode(m){
+  mode = m;
+  document.querySelectorAll("#modeSwitch button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.mode===m));
+  $("#q").placeholder = m==="in" ? "Search to sign someone in…" : "Search to sign someone out…";
+  filter = m==="out" ? "in" : "all";
+  render(); $("#q").focus();
+}
+document.querySelectorAll("#modeSwitch button").forEach(b=>b.addEventListener("click", ()=>setMode(b.dataset.mode)));
 
 /* ---------- filters ---------- */
-const DAY_FILTERS = [["all","All"],["present","Present"],["late","Late"],["absent","Absent"],["none","Not marked"]];
+const DAY_FILTERS = [["all","All"],["present","Present"],["late","Late"],["absent","Absent"],["none","Not marked"],["in","Still in"],["out","Signed out"]];
 function allFilters(){
   const N = dates().length;
   return [["all","All"],["every",N===2?"Both days":N===1?"Attended":`All ${N} days`],["some","Missed some days"],["never","Never attended"]];
 }
 function dayKey(p){ return marks(tab)[p.id]?.s || "none"; }
 function allKey(p){ const n=daysAttended(p.id), N=dates().length; return n===N ? "every" : n===0 ? "never" : "some"; }
-function passes(p){ return filter==="all" || (tab==="all" ? allKey(p)===filter : dayKey(p)===filter); }
+function passes(p){
+  if (filter==="all") return true;
+  if (tab==="all") return allKey(p)===filter;
+  const r = marks(tab)[p.id];
+  if (filter==="in") return isIn(r) && !r.o;
+  if (filter==="out") return isIn(r) && !!r.o;
+  return dayKey(p)===filter;
+}
 function drawChips(counts){
   const defs = tab==="all" ? allFilters() : DAY_FILTERS;
   if (!defs.some(d=>d[0]===filter)) filter="all";
@@ -568,7 +638,7 @@ function removeDay(){
   setDates(dates().slice(0,-1));
   if (tab===id) tab = "d"+(N-1);
   drawSettings(); render();
-  lastUndo = ()=>{ setDates([...dates(), lastDate]); queue(Object.entries(snap).map(([pid,r])=>markOp(id,pid,r.s,r.t))); drawSettings(); render(); };
+  lastUndo = ()=>{ setDates([...dates(), lastDate]); queue(Object.entries(snap).map(([pid,r])=>markOp(id,pid,r.s,r.t,r.o))); drawSettings(); render(); };
   toast(`${dayName(id)} removed`);
 }
 $("#dayPlus").addEventListener("click", addDay);
@@ -589,10 +659,14 @@ function render(flashId){
 
   drawTabs(all);
   document.querySelectorAll("[data-day-only]").forEach(el=>el.hidden=!isDay);
+  $("#modeSwitch").hidden = !isDay;
   $("#recentPanel").hidden = !isDay;
 
   const counts = {all:total};
-  if (isDay){ ["present","late","absent","none"].forEach(k=>counts[k]=0); all.forEach(p=>counts[dayKey(p)]++); }
+  if (isDay){
+    ["present","late","absent","none","in","out"].forEach(k=>counts[k]=0);
+    all.forEach(p=>{ counts[dayKey(p)]++; const r=marks(tab)[p.id]; if (isIn(r)) counts[r.o?"out":"in"]++; });
+  }
   else { ["every","some","never"].forEach(k=>counts[k]=0); all.forEach(p=>counts[allKey(p)]++); }
   drawChips(counts);
 
@@ -607,19 +681,21 @@ function render(flashId){
   } else list.innerHTML = shown.map(p=>{
     const sub = [`#${p.sn}`, hl(p.phone,q), p.email?hl(p.email,q):""].filter(Boolean).join("  ·  ");
     const head = `<div class="av" style="background:${colorFor(p.name)}">${initials(p.name)}</div>`;
-    const name = `<b>${hl(p.name,q)}${p.walkIn?'<span class="tag">walk-in</span>':""}</b>`;
+    const name = `<b>${hl(p.name,q)}${p.walkIn?'<span class="tag">walk-in</span>':""}<button class="edit" data-edit aria-label="Edit ${esc(p.name)}" title="Correct details"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></button></b>`;
     if (isDay){
-      const r = marks(tab)[p.id], s = r?.s||"";
-      return `<div class="row ${s} ${flashId===p.id?"flash":""}" data-id="${p.id}">${head}
-        <div class="who">${name}<small>${r&&s!=="absent"?`<span class="time">${s==="late"?"Late":"In"} at ${fmtTime(r.t)}</span>  ·  `:""}${sub}</small></div>
+      const r = marks(tab)[p.id], s = r?.s||"", inNow = isIn(r);
+      const times = inNow ? `<span class="time">${s==="late"?"Late":"In"} ${fmtTime(r.t)}${r.o?` · Out ${fmtTime(r.o)}`:""}</span>  ·  ` : "";
+      return `<div class="row ${s} ${r?.o?"out":""} ${flashId===p.id?"flash":""}" data-id="${p.id}">${head}
+        <div class="who">${name}<small>${times}${sub}</small></div>
         <div class="acts">
           <button class="st p" data-s="present" aria-pressed="${s==="present"}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="m5 12 5 5 9-10"/></svg>Present</button>
           <button class="st l" data-s="late" aria-pressed="${s==="late"}">Late</button>
+          <button class="st o" data-out aria-pressed="${!!r?.o}" ${inNow?"":"disabled"} title="${r?.o?"Remove sign-out":"Sign out"}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M9 16l-4-4 4-4M5 12h11"/></svg>${r?.o?"Out":"Sign out"}</button>
           <button class="st a" data-s="absent" aria-pressed="${s==="absent"}" aria-label="Absent">✕</button>
         </div></div>`;
     }
     const pill = d => { const r=marks(d)[p.id]; const s=r?.s||"none";
-      return `<button class="pill ${s}" data-go="${d}" title="Open ${dayName(d)}">${dayName(d)}<small>${s==="none"?"Not marked":s==="absent"?"Absent":(s==="late"?"Late ":"")+fmtTime(r.t)}</small></button>`; };
+      return `<button class="pill ${s}" data-go="${d}" title="Open ${dayName(d)}">${dayName(d)}<small>${s==="none"?"Not marked":s==="absent"?"Absent":(s==="late"?"Late ":"")+fmtTime(r.t)+(r.o?"–"+fmtTime(r.o):"")}</small></button>`; };
     const k = allKey(p), n = daysAttended(p.id);
     return `<div class="row ${N>3?"wide":""} ${k==="every"?"present":k==="some"?"late":""}" data-id="${p.id}">${head}
       <div class="who">${name}<small><span class="time">${n} of ${N} days</span>  ·  ${sub}</small></div><div class="pills">${dayIds().map(pill).join("")}</div></div>`;
@@ -627,9 +703,13 @@ function render(flashId){
 
   const hint = $("#hint");
   if (!isDay) hint.textContent = "Overview of every day. Tap a day on any row to go and edit that day.";
-  else if (q && shown.length===1) hint.innerHTML = `Press <b>Enter</b> to mark <b>${esc(shown[0].name)}</b> present for ${dayName(tab)}.`;
+  else if (q && shown.length===1) hint.innerHTML = mode==="in"
+      ? `Press <b>Enter</b> to sign <b>${esc(shown[0].name)}</b> in for ${dayName(tab)}.`
+      : `Press <b>Enter</b> to sign <b>${esc(shown[0].name)}</b> out.`;
   else if (q) hint.textContent = `${shown.length} matches`;
-  else hint.textContent = `Marking ${dayName(tab)}. When only one person matches your search, press Enter to mark them present.`;
+  else hint.textContent = mode==="in"
+      ? `Signing in for ${dayName(tab)}. When only one person matches your search, press Enter.`
+      : `Signing out for ${dayName(tab)}. Showing people still in. Press Enter when one person matches.`;
 
   const pct = n => total ? Math.round(n/total*100)+"%" : "0%";
   if (isDay){
@@ -638,10 +718,11 @@ function render(flashId){
     $("#progTitle").textContent = `${dayName(tab)} progress`;
     bars(counts.present,counts.late,counts.absent,total);
     $("#leg1").textContent = `${arrived} of ${total} arrived`;
-    $("#leg2").textContent = `${total-counts.none} marked`;
-    const m = marks(tab);
-    const rec = all.filter(p=>m[p.id]&&m[p.id].s!=="absent").sort((a,b)=>m[b.id].t-m[a.id].t).slice(0,6);
-    $("#recent").innerHTML = rec.length ? rec.map(p=>`<li><div class="av" style="background:${colorFor(p.name)}">${initials(p.name)}</div>${esc(p.name)}<em>${m[p.id].s==="late"?"late · ":""}${fmtTime(m[p.id].t)}</em></li>`).join("")
+    $("#leg2").textContent = `${counts.out} signed out · ${counts.in} still in`;
+    const m = marks(tab), ev = [];
+    all.forEach(p=>{ const r=m[p.id]; if(!isIn(r)) return; ev.push({p, t:r.t, k:r.s==="late"?"late in":"in"}); if(r.o) ev.push({p, t:r.o, k:"out"}); });
+    ev.sort((a,b)=>b.t-a.t);
+    $("#recent").innerHTML = ev.length ? ev.slice(0,6).map(e=>`<li><div class="av" style="background:${colorFor(e.p.name)}">${initials(e.p.name)}</div>${esc(e.p.name)}<em class="${e.k==="out"?"ev-out":""}">${e.k} · ${fmtTime(e.t)}</em></li>`).join("")
       : `<li style="color:var(--muted)">No one checked in yet.</li>`;
   } else {
     const avg = total ? all.reduce((a,p)=>a+daysAttended(p.id),0)/total : 0;
@@ -659,11 +740,13 @@ function bars(a,b,c,t){ [a,b,c].forEach((v,i)=>$("#b"+(i+1)).style.width=(t?v/t*
 $("#days").addEventListener("click", e=>{
   if (e.target.closest("#addDayTab")) return addDay();
   const b = e.target.closest(".day"); if(!b) return;
-  tab=b.dataset.tab; filter="all"; render();
+  tab=b.dataset.tab; filter = mode==="out" && tab!=="all" ? "in" : "all"; render();
 });
 $("#list").addEventListener("click", e=>{
   const go = e.target.closest("[data-go]");
   if (go){ tab=go.dataset.go; filter="all"; $("#q").value = people().find(p=>p.id===go.closest(".row").dataset.id).name; render(); window.scrollTo({top:0,behavior:"smooth"}); return; }
+  if (e.target.closest("[data-edit]")) return openEdit(e.target.closest(".row").dataset.id);
+  if (e.target.closest("[data-out]")) return signOut(e.target.closest(".row").dataset.id);
   const b = e.target.closest(".st"); if(!b) return;
   const id = b.closest(".row").dataset.id, s=b.dataset.s;
   setStatus(id, marks(tab)[id]?.s===s ? null : s, s!=="present");
@@ -672,7 +755,12 @@ $("#q").addEventListener("input", ()=>render());
 $("#q").addEventListener("keydown", e=>{
   if (e.key==="Enter" && tab!=="all"){
     const shown = people().filter(p=>matches(p,$("#q").value) && passes(p));
-    if (shown.length===1){ $("#q").value=""; setStatus(shown[0].id,"present"); }
+    if (shown.length===1){
+      $("#q").value="";
+      if (mode==="out") signOut(shown[0].id);
+      else if (isIn(marks(tab)[shown[0].id])){ render(); toast(`${shown[0].name} is already signed in`); }
+      else setStatus(shown[0].id,"present");
+    }
   } else if (e.key==="Escape"){ $("#q").value=""; render(); }
 });
 document.addEventListener("keydown", e=>{
@@ -690,22 +778,32 @@ $("#restAbsentBtn").addEventListener("click", ()=>{
   lastUndo = ()=>{ queue(ids.map(id=>markOp(day,id,""))); render(); };
   toast(`${ids.length} marked absent for ${dayName(day)}`);
 });
+$("#allOutBtn").addEventListener("click", ()=>{
+  const day = tab, m = marks(day), ids = people().filter(p=>isIn(m[p.id]) && !m[p.id].o).map(p=>p.id);
+  if (!ids.length) return toast("No one is still signed in");
+  if (!confirm(`Sign out all ${ids.length} people still in for ${dayName(day)}? Their sign-out time will be now.`)) return;
+  const snap = ids.map(id=>[id,{...m[id]}]), now = Date.now();
+  queue(snap.map(([id,r])=>markOp(day,id,r.s,r.t,now))); render();
+  lastUndo = ()=>{ queue(snap.map(([id,r])=>markOp(day,id,r.s,r.t,0))); render(); };
+  toast(`${ids.length} signed out`);
+});
 $("#resetBtn").addEventListener("click", ()=>{
   const d = tab;
   if(!confirm(`Clear every mark for ${dayName(d)} on all devices?`)) return;
   const snap = {...marks(d)};
   queue(Object.keys(snap).map(pid=>markOp(d,pid,""))); render();
-  lastUndo = ()=>{ queue(Object.entries(snap).map(([pid,r])=>markOp(d,pid,r.s,r.t))); render(); };
+  lastUndo = ()=>{ queue(Object.entries(snap).map(([pid,r])=>markOp(d,pid,r.s,r.t,r.o))); render(); };
   toast(`${dayName(d)} cleared`);
 });
 
 function statusText(d,id){ const r=marks(d)[id]; return r ? r.s[0].toUpperCase()+r.s.slice(1) : "Not marked"; }
 function timeText(d,id){ const r=marks(d)[id]; return r && r.s!=="absent" ? fmtTime(r.t) : ""; }
+function outText(d,id){ const r=marks(d)[id]; return r && r.s!=="absent" && r.o ? fmtTime(r.o) : ""; }
 const short = {Present:"P", Late:"L", Absent:"A", "Not marked":"–"};
 $("#csvBtn").addEventListener("click", ()=>{
   const ids = dayIds(), N = ids.length;
-  const head = ["S/N","Name","Phone","Email", ...ids.flatMap(d=>[`${dayName(d)} (${dateOf(d)})`,`${dayName(d)} time`]), "Days attended","Completed all days","Walk-in"];
-  const rows = people().map(p=>[p.sn,p.name,p.phone,p.email, ...ids.flatMap(d=>[statusText(d,p.id),timeText(d,p.id)]), `${daysAttended(p.id)} of ${N}`, daysAttended(p.id)===N?"Yes":"No", p.walkIn?"Yes":""]);
+  const head = ["S/N","Name","Phone","Email", ...ids.flatMap(d=>[`${dayName(d)} (${dateOf(d)})`,`${dayName(d)} in`,`${dayName(d)} out`]), "Days attended","Completed all days","Walk-in"];
+  const rows = people().map(p=>[p.sn,p.name,p.phone,p.email, ...ids.flatMap(d=>[statusText(d,p.id),timeText(d,p.id),outText(d,p.id)]), `${daysAttended(p.id)} of ${N}`, daysAttended(p.id)===N?"Yes":"No", p.walkIn?"Yes":""]);
   const csv = [head,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\r\n");
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob(["\ufeff"+csv],{type:"text/csv"}));
@@ -717,10 +815,10 @@ $("#printBtn").addEventListener("click", ()=>{
   const title = tab==="all" ? `All ${N} days` : `${dayName(tab)} · ${fmtDate(dateOf(tab))}`;
   const headRow = tab==="all"
     ? `<th>S/N</th><th>Name</th><th>Phone</th>${ids.map(d=>`<th>D${d.slice(1)}</th>`).join("")}<th>Days</th>`
-    : "<th>S/N</th><th>Name</th><th>Phone</th><th>Status</th><th>Time</th><th>Signature</th>";
+    : "<th>S/N</th><th>Name</th><th>Phone</th><th>Status</th><th>In</th><th>Out</th><th>Signature</th>";
   const body = list.map(p=> tab==="all"
     ? `<tr><td>${p.sn}</td><td>${esc(p.name)}</td><td>${esc(p.phone)}</td>${ids.map(d=>`<td>${short[statusText(d,p.id)]}</td>`).join("")}<td>${daysAttended(p.id)}/${N}</td></tr>`
-    : `<tr><td>${p.sn}</td><td>${esc(p.name)}${p.walkIn?" (walk-in)":""}</td><td>${esc(p.phone)}</td><td>${statusText(tab,p.id)}</td><td>${timeText(tab,p.id)}</td><td></td></tr>`).join("");
+    : `<tr><td>${p.sn}</td><td>${esc(p.name)}${p.walkIn?" (walk-in)":""}</td><td>${esc(p.phone)}</td><td>${statusText(tab,p.id)}</td><td>${timeText(tab,p.id)}</td><td>${outText(tab,p.id)}</td><td></td></tr>`).join("");
   $("#printArea").innerHTML = `<div class="ph"><img src="${LOGO}" alt=""><div><h2 style="margin:0">${esc($("#trainingName").value)}</h2><p style="margin:2px 0 10px">${title} · ${$("#leg1").textContent}${tab==="all"?" · P present, L late, A absent":""}</p></div></div>
     <table><thead><tr>${headRow}</tr></thead><tbody>${body}</tbody></table>`;
   window.print();
@@ -740,6 +838,26 @@ $("#dlg").addEventListener("close", ()=>{
   const id = "w-"+store.deviceId+"-"+Date.now();
   queue({type:"person", id, name, phone:$("#wPhone").value.trim(), email:$("#wEmail").value.trim()});
   $("#q").value=""; setStatus(id,"present");
+});
+
+let editing = null;
+function openEdit(id){
+  const p = people().find(x=>x.id===id); if(!p) return;
+  editing = id;
+  $("#eTitle").textContent = `Correct details · #${p.sn}`;
+  $("#eName").value = p.name; $("#ePhone").value = p.phone||""; $("#eEmail").value = p.email||"";
+  $("#edit").showModal(); $("#eName").focus();
+}
+$("#edit").addEventListener("close", ()=>{
+  if ($("#edit").returnValue!=="ok" || !editing) return;
+  const p = people().find(x=>x.id===editing); const id = editing; editing = null;
+  const next = {name:$("#eName").value.trim().replace(/\s+/g," "), phone:$("#ePhone").value.trim(), email:$("#eEmail").value.trim()};
+  if (!next.name) return;
+  if (next.name===p.name && next.phone===(p.phone||"") && next.email===(p.email||"")) return;
+  const prev = {name:p.name, phone:p.phone||"", email:p.email||""};
+  queue({type:"edit", pid:id, ...next}); render(id);
+  lastUndo = ()=>{ queue({type:"edit", pid:id, ...prev}); render(); };
+  toast(`Details updated for ${next.name}`);
 });
 
 let tt;
