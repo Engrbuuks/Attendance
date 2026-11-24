@@ -51,6 +51,13 @@ button{cursor:pointer}
 .title input{border:none;background:none;padding:0;color:var(--muted);font-size:.85rem;width:100%;text-overflow:ellipsis}
 .title input:hover,.title input:focus{color:var(--text)}
 .top-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+.sync{height:42px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:inline-flex;align-items:center;gap:8px;padding:0 12px;font-size:.82rem;font-weight:500;max-width:52vw;white-space:nowrap;overflow:hidden}
+.sync span{overflow:hidden;text-overflow:ellipsis}
+.sync i{width:9px;height:9px;border-radius:50%;background:var(--slate);flex:none}
+.sync.ok i{background:var(--green)} .sync.wait i{background:var(--orange)} .sync.err i{background:var(--maroon)}
+.sync.busy i{background:var(--green);animation:pulse 1s infinite alternate}
+.sync.err{color:var(--maroon)}
+@keyframes pulse{to{opacity:.3}}
 .icon-btn{width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center}
 .icon-btn svg{width:20px;height:20px}
 
@@ -71,6 +78,7 @@ button{cursor:pointer}
 @media (max-width:940px){.grid{grid-template-columns:minmax(0,1fr)}}
 .grid>*{min-width:0}
 @media (max-width:640px){
+  .sync{padding:0 10px;max-width:44vw}
   .days{gap:8px}
   .day{flex:0 0 112px;flex-direction:column;align-items:flex-start;gap:6px;padding:10px;border-radius:16px}
   .day .num{width:30px;height:30px;border-radius:10px;font-size:.85rem}
@@ -209,6 +217,7 @@ dialog input{width:100%;border:1px solid var(--line);background:var(--surface-2)
       <input type="text" id="trainingName" aria-label="Training name" value="Owerri shortlisted candidates training">
     </div>
     <div class="top-actions">
+      <button class="sync off" id="syncBtn"><i></i><span id="syncTxt">Not connected</span></button>
       <button class="icon-btn" id="themeBtn" aria-label="Toggle dark mode">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
       </button>
@@ -264,7 +273,8 @@ dialog input{width:100%;border:1px solid var(--line);background:var(--surface-2)
         <div id="dateList"></div>
         <div class="setting"><label for="lateAfter">Count as late after</label><input type="time" id="lateAfter"></div>
         <p class="hint" style="margin-top:0">Leave the time blank to turn auto-late off.</p>
-        <button class="btn danger" id="resetBtn" data-day-only>Clear this day’s marks</button>
+        <div class="toolbar" style="margin-top:4px"><button class="btn" id="connBtn">Connection</button>
+        <button class="btn danger" id="resetBtn" data-day-only>Clear this day’s marks</button></div>
       </section>
     </aside>
   </div>
@@ -283,73 +293,165 @@ dialog input{width:100%;border:1px solid var(--line);background:var(--surface-2)
   </form>
 </dialog>
 
+<dialog id="conn">
+  <form method="dialog">
+    <h3>Connect to your attendance Sheet</h3>
+    <p class="hint" style="margin:0">Every device that connects shares the same attendance. Changes made offline are sent when the device is back online.</p>
+    <div id="cUrlWrap"><label>Web app URL<input id="cUrl" placeholder="https://script.google.com/macros/s/…/exec"></label></div>
+    <label>Access code<input id="cKey" required autocomplete="off"></label>
+    <p class="hint danger" id="cErr"></p>
+    <div class="dlg-actions">
+      <button class="btn" value="cancel" formnovalidate>Not now</button>
+      <button class="btn primary" value="ok">Connect</button>
+    </div>
+  </form>
+</dialog>
 <div class="toast" id="toast" role="status"><span id="toastMsg"></span><button id="undoBtn">Undo</button></div>
 <div id="printArea"></div>
 
 <script>
-const BASE = [
-["Mary Duru","08138780967","maryduru25@gmail.com"],["Sandra Uzoma","07063079660","Sandraugochi10@gmail.com"],["Akobundu Chidinma","09042875916","akobunduchidinma29@gmail.com"],["Chucks Nnamdi","08125791159","chukscnc87@gmail.com"],["Hampo Helen","07010684300","hpraise325@gmail.com"],["Elizabeth Oluzor","09035600836","oliveramarachi086@gmail.com"],["Maryann Nwadike","09037402517","maryannnwadike1@gmail.com"],["Opara Winifred","09033429665","oparawinifred45@gmail.com"],["Anyaghara Cynthia","08032897475","anyagharacynthia@gmail.com"],["Chidozie Ofiha","09065599399","ofohachidozie@gmail.com"],
-["Arinze Okechechukwu","08110063263","tonyokechukwu16@gmail.com"],["Aneke Francis","08143904012","anekeonyedikachi97@gmail.com"],["Benedicta Nkemdirim","08148329495","benedictankemdirim67@gmail.com"],["Chimadindu Peter","09033188663","peterschinadindunaomi@gmail.com"],["Justinkeven Esther","09069001631","justinkevenesther6@gmail.com"],["Emeto Chidera","08129951239",""],["Sixtus Okoro","09031304455","sixtusokoro026@gmail.com"],["Amarachi Nwaozuzu","08148259928","nwaozuzuamarachi703@gmail.com"],["Abam James","07031283508","7474james@gmail.com"],["Emmanuel Divine Chidera","08140254211",""],
-["Tobechukwu Cyntius","07069747507","cynthiatobechukwu1000@gmail.com"],["Fortune Nykson","09031840452","namzyfortune@gmail.com"],["Okoro Oluchukwu","09069401997","oluchukwuokoro70@gmail.com"],["JustGem-Edwin Munachimso","09034128520","gemedwin90@gmail.com"],["Divine Kelly","09156340181","divinekelly25@gmail.com"],["Uwandu Cynthia","08102975561",""],["Annabel Onyechi","08060574845","onyechianabel@gmail.com"],["Okechukwu Chidera","09067439802",""],["Obiamyu Onwuru","08145588218","obianujuowunna014@gmail.com"],["Ivy Uzoho","08108731530","ivyuzoho@gmail.com"],
-["Cynthia Elejewi","09069436828","elejere9@gmail.com"],["Ogechi Osuchukwu","07065223418","oge303088@gmail.com"],["Vera Ikpeama","08138172991","veraikpeama@gmail.com"],["Stella Chibuzo","09011168595",""],["Chinyere Nnawuaku","08169763549",""],["Malvin Famous","09035421318","malvinfamoussunday@gmail.com"],["Uwandu Choamaka","08102975501","uwanduchiamaka7@gmail.com"],["Victor Daniel","08137124245","edanielvictor49@gmail.com"],["Sylverline Nwaka","09125293724","nwakachinyere94@gmail.com"],["Favour Onyema","08149757037","favouronyema92@gmail.com"],
-["Anokwu Aloysius","09053187611",""],["Amazing grace Abam","07063762409","amazinggraceabam4@gmail.com"],["Goodness Golden","08149382812","goodnessgolden03@gmail.com"],["Emmanuel Ihegworo","09018871458","emmanuelihegworo73@gmail.com"],["Grace Chinozyerum","07081445888","graciousg829@gmail.com"],["Ekeh Esther","09165411358","tripplee62@gmail.com"],["Vivian Ifeyinwa","07069522661","vonyemelusi@gmail.com"],["Esther Uruakpa","08132090724",""],["Confidence Ndudi","07030346788",""],["Confidence Ikira","09062220526",""],
-["Chioma Olivia","08142516749","chiomaolivia448@gmail.com"],["Onwueme Chizarara","08169768546","bekkyemma03@gmail.com"],["Cynthia Ibekwe","07018879683","ibekwecynthia85@gmail.com"],["Enerst Ezime","09076963367","enerstezinne@gmail.com"],["Faith Amanze","07063897425","faithamanze4@gmail.com"],["Ednah Onyediri","09061972951","Ednahonyediri@gmail.com"],["Chinaza Osuyi","08075530142","chinazaosuji97@gmail.com"],["Oluchi Donald","08064888226","donaldoluchi60@gmail.com"],["Igwe Chiamaka","09036340385",""],["Onyeachusin Felista","08163341550",""],
-["Mbadiegwu Cynthia","07065480827",""],["Nkechinyere Rosemary","08106730886","rosenkechinyere084@gmail.com"],["Johnbosco Nwooza","08032149461",""],["Vero Nkechi","09036168757",""],["Aiyegburoju Emmanuel","07049267733",""],["Jennifer Martins","08132131808","jlopemartins@gmail.com"],["Sunju Chiemela","08064785682","sunjuchiemela15@gmail.com"],["Ahan Uchechi","08165666355","ahamuche@gmail.com"],["Njoku Chukwueba","07062791063",""],["Maureen Ejimadu","07035325426",""],
-["Blessing Nwodu","08162600858","blssing858@gmail.com"],["Iwueze Destiny","07035494744","iwuezidestiny009@gmail.com"],["Osuoha Ugonna","07026440408","osuoha.ugonna@gmail.com"],["Ejiaku Rita","09141622906","edna11547@gmail.com"],["Ebubechi Victory","09036084475","ebubechivictory3@gmail.com"],["Sopuruchi Stella","08109217965",""],["Oluwaseyi Johnson","08151436520",""],["Sandra Ezinne","08066367484","sezinne402@gmail.com"],["Ezukwujiaku Kingsley","07042403165","ycash7334@gmail.com"],["Owulezi Chiemeri","09134816390","ahmemerie@gmail.com"],
-["Orjiako Chisom","09169235744","Mchisom986@gmail.com"],["Nwachukwu Joy","09139197267","uzochijoynwachukwu@gmail.com"],["Mbachu Chisom","08131322400","mbachuchisom91@gmail.com"],["Joy Ibekwe","08124729124 / 09165806844","ibeksjoy@gmail.com"],["Nwachukwu Confidence","07038449660 / 09117825605",""],["Mbaoma Lilian","07087602199 / 07063667137","lilianmbaoma@gmail.com"],["Anthony Osuji","08121478318","anthonyosuji1@yahoo.com"],["Faith Chisom","07071794949",""],["Amadi Eberechi","08108763595","eberechiamadi93@gmail.com"],["Success Ihchiluru","08119011401","preciousihechiluru2@gmail.com"],
-["Robert Victoria","07066300673","robertobianuju3@gmail.com"],["Ajoku Lilian","08141681708","lilianchiwenwa@gmail.co"],["Amaefule Bobbycliff","09036637560","Chigozirimcliff32@gmail.com"],["Dimgba Linda","07037014634",""],["Obiesi Favour","07060961198","favourc1994@gmail.com"],["Ajaelo Ifeanyichukwu","07030376036","ajaeloifeanyichukwu@gmail.com"],["Chukwukere Chioma","07038987454","chukwukerec27@gmail.com"],["Asogu Peter","09137521891","asoguenyinna12@gmail.com"],["Osurumba Ngozi","07033397899","ngb06104@gmail.com"],["Asogu Enyinne","09137571891",""],
-["Ogbonnaya Amarachi Adanna","09069001631","amarachiogbonnaya58@gmail.com"]
-];
+/* ============================================================
+   Paste your Apps Script Web app URL here (ends in /exec).
+   Each device then only needs the access code.
+   ============================================================ */
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzcEW5WIXPzcPJthhbtwPV8u5ZN48TaitFBKXJ_dTN5i2OWR3wWF2yfr6exUq7ZT_XwGA/exec";
 
 const LOGO = document.querySelector(".brand img").src;
-const KEY = "bravo-attendance-2day-v1";
+const KEY = "bravo-attendance-sync-v1";
 const COLORS = ["#cdeeb4","#f3d6cf","#d8ecc7","#ffe59e","#e6f2d9","#f6e0c4","#dfe8dc","#f1cfc8"];
 const $ = s => document.querySelector(s);
 
-function load(){ try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e){ return {}; } }
-function save(){ try { localStorage.setItem(KEY, JSON.stringify(store)); } catch(e){} }
 function ymd(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 function nextDate(s){ const d=new Date((s||ymd(new Date()))+"T12:00"); d.setDate(d.getDate()+1); return ymd(d); }
+function readLS(k){ try { return JSON.parse(localStorage.getItem(k)) || null; } catch(e){ return null; } }
+function writeLS(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
 
-let store = load();
-store.extras ||= []; store.days ||= {}; store.settings ||= {};
+/* ---------- local state ---------- */
+let store = readLS(KEY) || {};
+store.people ||= [];          // from the Sheet: candidates + walk-ins
+store.days ||= {};            // { d1: { c1: {s,t,u} } }
+store.settings ||= {};
+store.outbox ||= [];          // changes not yet on the Sheet
+store.deviceId ||= "dev-" + Math.random().toString(36).slice(2,8);
+if (!Array.isArray(store.settings.dates)){ const t=ymd(new Date()); store.settings.dates=[t, nextDate(t)]; }
+let conn = readLS(KEY+"-conn") || {url:SCRIPT_URL, key:""};
+if (SCRIPT_URL) conn.url = SCRIPT_URL;
+const save = () => writeLS(KEY, store);
 
-// bring over marks from the first one-day page, if any
-try {
-  const old = JSON.parse(localStorage.getItem("owerri-attendance-v1") || "null");
-  if (old && !store.settings.migrated){
-    const firstDay = old.days && Object.keys(old.days).sort()[0];
-    if (firstDay && !Object.keys(store.days.d1||{}).length){ store.days.d1 = old.days[firstDay]; store.settings.date1 = firstDay; }
-    if (old.extras?.length && !store.extras.length) store.extras = old.extras;
-    if (old.settings?.lateAfter && !store.settings.lateAfter) store.settings.lateAfter = old.settings.lateAfter;
+let opSeq = 0;
+function newOp(o){ return {...o, id: store.deviceId+"-"+Date.now()+"-"+(opSeq++), u: o.u || Date.now()}; }
+
+function applyOp(op){
+  if (op.type==="mark"){
+    const m = store.days[op.day] ||= {};
+    if (op.s) m[op.pid] = {s:op.s, t:op.t, u:op.u}; else delete m[op.pid];
+  } else if (op.type==="person"){
+    if (!store.people.some(p=>p.id===op.id)) store.people.push({id:op.id, name:op.name, phone:op.phone, email:op.email, walkIn:true});
+  } else if (op.type==="setting"){
+    store.settings[op.k] = op.k==="dates" ? JSON.parse(op.v) : op.v;
   }
-  store.settings.migrated = true;
-} catch(e){}
-
-// dates list: one entry per training day (upgrades the earlier 2-day format)
-if (!Array.isArray(store.settings.dates)){
-  const d1 = store.settings.date1 || ymd(new Date());
-  store.settings.dates = [d1, store.settings.date2 || nextDate(d1)];
-  delete store.settings.date1; delete store.settings.date2;
 }
+function queue(ops){
+  [].concat(ops).forEach(o=>{ const op=newOp(o); applyOp(op); store.outbox.push(op); });
+  save(); scheduleSync(400);
+}
+const markOp = (day,pid,s,t) => ({type:"mark", day, pid, s:s||"", t:t||Date.now(), dev:store.deviceId});
+
+/* ---------- sync ---------- */
+let syncing=false, syncError=null, syncTimer=null;
+function scheduleSync(ms){ clearTimeout(syncTimer); syncTimer=setTimeout(sync, ms); }
+
+function setServerState(d){
+  const people = d.candidates.map(c=>({id:"c"+c.sn, name:c.name, phone:c.phone, email:c.email}))
+    .concat(d.walkins.map(w=>({...w, walkIn:true})));
+  store.people = people;
+  const days = {};
+  d.marks.forEach(m=>{ (days[m.day] ||= {})[m.pid] = {s:m.s, t:m.t, u:m.u}; });
+  store.days = days;
+  for (const [k,{v}] of Object.entries(d.settings||{})){
+    try { store.settings[k] = k==="dates" ? JSON.parse(v) : v; } catch(e){}
+  }
+}
+
+async function sync(){
+  if (!conn.url || !conn.key || syncing){ badge(); return; }
+  if (!navigator.onLine){ badge(); return; }
+  syncing = true; badge();
+  const sending = store.outbox.slice();
+  const before = JSON.stringify([store.people, store.days, store.settings]);
+  try {
+    const res = await fetch(conn.url, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify({key:conn.key, ops:sending})});
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || "Sync failed");
+    const sent = new Set(sending.map(o=>o.id));
+    store.outbox = store.outbox.filter(o=>!sent.has(o.id));
+    setServerState(data);
+    store.outbox.forEach(applyOp);          // changes made while this sync was in flight
+    store.lastSync = Date.now(); syncError = null;
+    save();
+    if (JSON.stringify([store.people, store.days, store.settings]) !== before){ applySettingsToUI(); drawSettings(); render(); }
+  } catch(e){
+    syncError = /access code/i.test(e.message) ? e.message : (navigator.onLine ? "Can’t reach the Sheet" : null);
+    if (/access code/i.test(e.message)) openConn();
+  }
+  syncing = false; badge();
+  if (store.outbox.length && !syncError) scheduleSync(1500);
+}
+window.addEventListener("online", ()=>sync());
+window.addEventListener("offline", ()=>badge());
+document.addEventListener("visibilitychange", ()=>{ if (document.visibilityState==="visible") sync(); });
+setInterval(()=>sync(), 20000);
+
+function badge(){
+  const b=$("#syncBtn"), n=store.outbox.length, txt=$("#syncTxt");
+  let cls="", t="";
+  if (!conn.url || !conn.key){ cls="off"; t="Not connected"; }
+  else if (syncing){ cls="busy"; t="Syncing…"; }
+  else if (!navigator.onLine){ cls="wait"; t = n ? `Offline · ${n} waiting` : "Offline"; }
+  else if (syncError){ cls="err"; t = syncError; }
+  else { cls = n ? "wait" : "ok"; t = n ? `${n} waiting` : (store.lastSync ? `Synced ${fmtTime(store.lastSync)}` : "Connected"); }
+  b.className = "sync "+cls; txt.textContent = t;
+  b.title = "Tap to sync now";
+}
+$("#syncBtn").addEventListener("click", ()=>{ if (!conn.url || !conn.key || /access code/i.test(syncError||"")) openConn(); else sync(); });
+
+function openConn(){
+  $("#cUrl").value = conn.url || ""; $("#cKey").value = conn.key || "";
+  $("#cUrlWrap").hidden = !!SCRIPT_URL;
+  $("#cErr").textContent = /access code/i.test(syncError||"") ? "That access code was not accepted." : "";
+  if (!$("#conn").open) $("#conn").showModal();
+}
+$("#connBtn").addEventListener("click", openConn);
+$("#conn").addEventListener("close", ()=>{
+  if ($("#conn").returnValue!=="ok") return;
+  conn = {url: SCRIPT_URL || $("#cUrl").value.trim(), key: $("#cKey").value.trim()};
+  writeLS(KEY+"-conn", conn); syncError=null; sync();
+});
+
+// carry over marks taken with the previous (device-only) version
+(function importOld(){
+  if (store.importedOld) return;
+  const old = readLS("bravo-attendance-2day-v1");
+  store.importedOld = true;
+  if (!old) return save();
+  (old.extras||[]).forEach(p=>queue({type:"person", id:p.id, name:p.name, phone:p.phone||"", email:p.email||""}));
+  Object.entries(old.days||{}).forEach(([day,m])=>Object.entries(m||{}).forEach(([pid,r])=>queue({...markOp(day,pid,r.s,r.t), u:r.t})));
+  const s = old.settings||{};
+  const dates = Array.isArray(s.dates) ? s.dates : (s.date1 ? [s.date1, s.date2||nextDate(s.date1)] : null);
+  if (dates) queue({type:"setting", k:"dates", v:JSON.stringify(dates)});
+  if (s.name) queue({type:"setting", k:"name", v:s.name});
+  if (s.lateAfter) queue({type:"setting", k:"lateAfter", v:s.lateAfter});
+})();
+
+/* ---------- helpers ---------- */
 const dates = () => store.settings.dates;
 const dayIds = () => dates().map((_,i)=>"d"+(i+1));
 const dayName = id => "Day "+id.slice(1);
 const dateOf = id => dates()[+id.slice(1)-1];
-dayIds().forEach(id=> store.days[id] ||= {});
-save();
-
-if (store.settings.name) $("#trainingName").value = store.settings.name;
-if (store.settings.lateAfter) $("#lateAfter").value = store.settings.lateAfter;
-
-let tab = (()=>{ const i = dates().indexOf(ymd(new Date())); return i>=0 ? "d"+(i+1) : "d1"; })();
-let filter = "all";
-let lastUndo = null;
 
 function people(){
-  const base = BASE.map((p,i)=>({id:"c"+(i+1), sn:i+1, name:p[0], phone:p[1], email:p[2]}));
-  const extra = store.extras.map((p,i)=>({...p, sn:BASE.length+i+1, walkIn:true}));
-  return base.concat(extra);
+  let w = 0, nCand = store.people.filter(p=>!p.walkIn).length;
+  return store.people.map(p=>({...p, sn: p.walkIn ? nCand + (++w) : +p.id.slice(1)}));
 }
 const marks = d => store.days[d] ||= {};
 const arrivedOn = (d,id) => { const s = marks(d)[id]?.s; return s==="present" || s==="late"; };
@@ -381,6 +483,16 @@ function colorFor(n){ let h=0; for(const c of n) h=(h*31+c.charCodeAt(0))>>>0; r
 const fmtTime = t => new Date(t).toLocaleTimeString([], {hour:"numeric", minute:"2-digit"});
 const fmtDate = s => s ? new Date(s+"T12:00").toLocaleDateString([], {weekday:"short", day:"numeric", month:"short"}) : "Set a date";
 
+function applySettingsToUI(){
+  if (store.settings.name && document.activeElement!==$("#trainingName")) $("#trainingName").value = store.settings.name;
+  if (store.settings.lateAfter!==undefined && document.activeElement!==$("#lateAfter")) $("#lateAfter").value = store.settings.lateAfter;
+}
+applySettingsToUI();
+
+let tab = (()=>{ const i = dates().indexOf(ymd(new Date())); return i>=0 ? "d"+(i+1) : "d1"; })();
+let filter = "all";
+let lastUndo = null;
+
 function isLateNow(){
   const v = $("#lateAfter").value; if(!v) return false;
   const [h,m] = v.split(":").map(Number); const n=new Date();
@@ -388,31 +500,24 @@ function isLateNow(){
 }
 
 function setStatus(id, status, manual){
-  const m = marks(tab);
-  const prev = m[id] ? {...m[id]} : null;
-  if (status===null) delete m[id];
-  else {
-    if (status==="present" && !manual && isLateNow()) status="late";
-    m[id] = {s:status, t:Date.now()};
-  }
-  save(); render(id);
+  const day = tab, prev = marks(day)[id] ? {...marks(day)[id]} : null;
+  if (status==="present" && !manual && isLateNow()) status="late";
+  queue(markOp(day, id, status));
+  render(id);
   const p = people().find(x=>x.id===id);
-  lastUndo = ()=>{ if(prev) m[id]=prev; else delete m[id]; save(); render(); };
-  toast(`${p.name} ${({present:"marked present",late:"marked late",absent:"marked absent"})[status]||"unmarked"} for ${dayName(tab)}`);
+  lastUndo = ()=>{ queue(markOp(day, id, prev?.s, prev?.t)); render(); };
+  toast(`${p.name} ${({present:"marked present",late:"marked late",absent:"marked absent"})[status]||"unmarked"} for ${dayName(day)}`);
 }
 
 /* ---------- filters ---------- */
 const DAY_FILTERS = [["all","All"],["present","Present"],["late","Late"],["absent","Absent"],["none","Not marked"]];
 function allFilters(){
   const N = dates().length;
-  return [["all","All"],["every",N===2?"Both days":`All ${N} days`],["some","Missed some days"],["never","Never attended"]];
+  return [["all","All"],["every",N===2?"Both days":N===1?"Attended":`All ${N} days`],["some","Missed some days"],["never","Never attended"]];
 }
 function dayKey(p){ return marks(tab)[p.id]?.s || "none"; }
 function allKey(p){ const n=daysAttended(p.id), N=dates().length; return n===N ? "every" : n===0 ? "never" : "some"; }
-function passes(p){
-  if (filter==="all") return true;
-  return tab==="all" ? allKey(p)===filter : dayKey(p)===filter;
-}
+function passes(p){ return filter==="all" || (tab==="all" ? allKey(p)===filter : dayKey(p)===filter); }
 function drawChips(counts){
   const defs = tab==="all" ? allFilters() : DAY_FILTERS;
   if (!defs.some(d=>d[0]===filter)) filter="all";
@@ -445,31 +550,32 @@ function drawTabs(all){
 function drawSettings(){
   $("#dayCount").textContent = dates().length;
   $("#dayMinus").disabled = dates().length<=1;
+  if ($("#dateList").contains(document.activeElement)) return;
   $("#dateList").innerHTML = dates().map((d,i)=>`<div class="setting"><label for="date${i}">Day ${i+1} date</label><input type="date" id="date${i}" data-i="${i}" value="${d}"></div>`).join("");
 }
+const setDates = arr => queue({type:"setting", k:"dates", v:JSON.stringify(arr)});
 function addDay(){
-  dates().push(nextDate(dates()[dates().length-1]));
-  store.days["d"+dates().length] = {};
-  save(); tab = "d"+dates().length; filter="all"; drawSettings(); render();
+  setDates([...dates(), nextDate(dates()[dates().length-1])]);
+  tab = "d"+dates().length; filter="all"; drawSettings(); render();
   lastUndo = null; toast(`${dayName(tab)} added`);
   $("#days").scrollLeft = $("#days").scrollWidth;
 }
 function removeDay(){
   const N = dates().length; if (N<=1) return;
-  const id = "d"+N, n = Object.keys(marks(id)).length;
+  const id = "d"+N, snap = {...marks(id)}, n = Object.keys(snap).length, lastDate = dates()[N-1];
   if (n && !confirm(`${dayName(id)} has ${n} marks. Remove the day and its marks?`)) return;
-  const snap = {date:dates()[N-1], marks:marks(id)};
-  dates().pop(); delete store.days[id];
+  queue(Object.keys(snap).map(pid=>markOp(id,pid,"")));
+  setDates(dates().slice(0,-1));
   if (tab===id) tab = "d"+(N-1);
-  save(); drawSettings(); render();
-  lastUndo = ()=>{ dates().push(snap.date); store.days[id]=snap.marks; save(); drawSettings(); render(); };
+  drawSettings(); render();
+  lastUndo = ()=>{ setDates([...dates(), lastDate]); queue(Object.entries(snap).map(([pid,r])=>markOp(id,pid,r.s,r.t))); drawSettings(); render(); };
   toast(`${dayName(id)} removed`);
 }
 $("#dayPlus").addEventListener("click", addDay);
 $("#dayMinus").addEventListener("click", removeDay);
 $("#dateList").addEventListener("change", e=>{
-  const i = e.target.dataset.i; if (i==null) return;
-  dates()[i] = e.target.value; save(); render();
+  const i = e.target.dataset.i; if (i==null || !e.target.value) return;
+  const arr = [...dates()]; arr[i] = e.target.value; setDates(arr); render();
 });
 
 /* ---------- render ---------- */
@@ -492,7 +598,11 @@ function render(flashId){
 
   const shown = all.filter(p=>matches(p,q) && passes(p));
   const list = $("#list");
-  if (!shown.length){
+  if (!total){
+    list.innerHTML = conn.url && conn.key
+      ? `<div class="empty">Loading the candidate list from your Sheet…<br><small>This needs internet the first time on each device. After that it works offline.</small></div>`
+      : `<div class="empty">Connect to your attendance Sheet to load the candidate list.<br><button class="btn primary" style="margin-top:12px" onclick="openConn()">Connect</button></div>`;
+  } else if (!shown.length){
     list.innerHTML = `<div class="empty">${q?`No one matches “${esc(q)}”.`:"No one in this group yet."}${isDay&&q?`<br><button class="btn primary" style="margin-top:12px" onclick="openAdd()">Add as walk-in</button>`:""}</div>`;
   } else list.innerHTML = shown.map(p=>{
     const sub = [`#${p.sn}`, hl(p.phone,q), p.email?hl(p.email,q):""].filter(Boolean).join("  ·  ");
@@ -569,21 +679,23 @@ document.addEventListener("keydown", e=>{
   if (e.key==="/" && !["INPUT","TEXTAREA"].includes(document.activeElement.tagName)){ e.preventDefault(); $("#q").focus(); }
 });
 
-$("#trainingName").addEventListener("change", e=>{ store.settings.name=e.target.value; save(); });
-$("#lateAfter").addEventListener("change", e=>{ store.settings.lateAfter=e.target.value; save(); });
+$("#trainingName").addEventListener("change", e=>queue({type:"setting", k:"name", v:e.target.value}));
+$("#lateAfter").addEventListener("change", e=>queue({type:"setting", k:"lateAfter", v:e.target.value}));
 
 $("#restAbsentBtn").addEventListener("click", ()=>{
-  const m = marks(tab); const ids = people().filter(p=>!m[p.id]).map(p=>p.id);
+  const day = tab, m = marks(day); const ids = people().filter(p=>!m[p.id]).map(p=>p.id);
   if(!ids.length) return toast("Everyone is already marked");
-  if(!confirm(`Mark ${ids.length} unmarked people absent for ${dayName(tab)}?`)) return;
-  ids.forEach(id=>m[id]={s:"absent",t:Date.now()}); save(); render();
-  lastUndo = ()=>{ ids.forEach(id=>delete m[id]); save(); render(); };
-  toast(`${ids.length} marked absent for ${dayName(tab)}`);
+  if(!confirm(`Mark ${ids.length} unmarked people absent for ${dayName(day)}?`)) return;
+  queue(ids.map(id=>markOp(day,id,"absent"))); render();
+  lastUndo = ()=>{ queue(ids.map(id=>markOp(day,id,""))); render(); };
+  toast(`${ids.length} marked absent for ${dayName(day)}`);
 });
 $("#resetBtn").addEventListener("click", ()=>{
-  if(!confirm(`Clear every mark for ${dayName(tab)}?`)) return;
-  const snap={...marks(tab)}, d=tab; store.days[d]={}; save(); render();
-  lastUndo = ()=>{ store.days[d]=snap; save(); render(); };
+  const d = tab;
+  if(!confirm(`Clear every mark for ${dayName(d)} on all devices?`)) return;
+  const snap = {...marks(d)};
+  queue(Object.keys(snap).map(pid=>markOp(d,pid,""))); render();
+  lastUndo = ()=>{ queue(Object.entries(snap).map(([pid,r])=>markOp(d,pid,r.s,r.t))); render(); };
   toast(`${dayName(d)} cleared`);
 });
 
@@ -625,8 +737,8 @@ $("#addBtn").addEventListener("click", openAdd);
 $("#dlg").addEventListener("close", ()=>{
   if ($("#dlg").returnValue!=="ok") return;
   const name = $("#wName").value.trim(); if(!name) return;
-  const id = "w"+Date.now();
-  store.extras.push({id, name, phone:$("#wPhone").value.trim(), email:$("#wEmail").value.trim()});
+  const id = "w-"+store.deviceId+"-"+Date.now();
+  queue({type:"person", id, name, phone:$("#wPhone").value.trim(), email:$("#wEmail").value.trim()});
   $("#q").value=""; setStatus(id,"present");
 });
 
@@ -648,8 +760,12 @@ $("#themeBtn").addEventListener("click", ()=>{
   render();
 });
 
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(()=>{});
+
 drawSettings();
 render();
+badge();
+if (!conn.url || !conn.key) openConn(); else sync();
 </script>
 </body>
 </html>
