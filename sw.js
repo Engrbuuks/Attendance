@@ -1,6 +1,6 @@
 // Keeps the attendance page available offline.
 // Bump the version when you upload a new index.html so phones pick it up quickly.
-const CACHE = "bravo-attendance-v4";
+const CACHE = "bravo-attendance-v5";
 const SHELL = ["./", "./index.html"];
 
 self.addEventListener("install", e => {
