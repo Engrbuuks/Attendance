@@ -153,6 +153,16 @@ mark{background:#ffe27a;color:#1c2a1a;border-radius:3px;padding:0 1px}
 .row.out .av{opacity:.7}
 .recent em.ev-out{color:var(--maroon)}
 @media (max-width:560px){.st.o{flex:1}}
+.panel-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.panel-head .modes{margin-bottom:0}
+.loc-btn{margin-left:auto;border:1px solid var(--line);background:var(--green-soft);color:var(--green-ink);border-radius:12px;padding:8px 12px;font-weight:600;font-size:.85rem;display:inline-flex;gap:6px;align-items:center}
+.loc-btn svg{width:16px;height:16px}
+.loc-opt{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:16px;padding:12px 14px;margin-top:8px}
+.loc-opt b{display:block;font-weight:600}
+.loc-opt small{color:var(--muted)}
+.loc-opt[aria-pressed="true"]{border-color:var(--green);background:var(--green-soft)}
+.loc-tag{color:var(--maroon);font-weight:600}
+dialog select{width:100%;border:1px solid var(--line);background:var(--surface-2);border-radius:12px;padding:10px 12px;margin-top:4px}
 .pills{display:flex;gap:6px;flex-wrap:wrap}
 .row.wide{grid-template-columns:auto 1fr}
 .row.wide .pills{grid-column:1/-1}
@@ -234,7 +244,7 @@ dialog input{width:100%;border:1px solid var(--line);background:var(--surface-2)
     <div class="mark"><img src="data:image/png;base64,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" alt="The Bravo"></div>
     <div class="title">
       <h1>Training attendance</h1>
-      <input type="text" id="trainingName" aria-label="Training name" value="Owerri shortlisted candidates training">
+      <input type="text" id="trainingName" aria-label="Training name" value="Shortlisted candidates training">
     </div>
     <div class="top-actions">
       <button class="sync off" id="syncBtn"><i></i><span id="syncTxt">Not connected</span></button>
@@ -248,9 +258,12 @@ dialog input{width:100%;border:1px solid var(--line);background:var(--surface-2)
 
   <div class="grid">
     <main class="panel">
+      <div class="panel-head">
       <div class="modes" id="modeSwitch" role="group" aria-label="Mode">
         <button data-mode="in" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4M15 16l4-4-4-4M19 12H8"/></svg>Sign in</button>
         <button data-mode="out" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M9 16l-4-4 4-4M5 12h11"/></svg>Sign out</button>
+      </div>
+      <button class="loc-btn" id="locBtn" hidden title="Change location"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span id="locTxt"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></button>
       </div>
       <div class="search">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -311,6 +324,7 @@ dialog input{width:100%;border:1px solid var(--line);background:var(--surface-2)
     <label>Full name<input id="wName" required></label>
     <label>Phone<input id="wPhone" inputmode="tel"></label>
     <label>Email<input id="wEmail" type="email"></label>
+    <label>Location<select id="wLoc"></select></label>
     <div class="dlg-actions">
       <button class="btn" value="cancel" formnovalidate>Cancel</button>
       <button class="btn primary" value="ok">Add and mark present</button>
@@ -318,12 +332,19 @@ dialog input{width:100%;border:1px solid var(--line);background:var(--surface-2)
   </form>
 </dialog>
 
+<dialog id="locDlg">
+  <h3>Which location is this device at?</h3>
+  <p class="hint" style="margin:0">This device will show only that location’s people and numbers. You can change it any time.</p>
+  <div id="locList"></div>
+  <div class="dlg-actions"><form method="dialog"><button class="btn">Close</button></form></div>
+</dialog>
 <dialog id="edit">
   <form method="dialog">
     <h3 id="eTitle">Correct details</h3>
     <label>Full name<input id="eName" required></label>
     <label>Phone<input id="ePhone" inputmode="tel"></label>
     <label>Email<input id="eEmail" type="email"></label>
+    <label>Location<select id="eLoc"></select></label>
     <p class="hint">The change is saved to the Sheet and shows on every device.</p>
     <div class="dlg-actions">
       <button class="btn" value="cancel" formnovalidate>Cancel</button>
@@ -372,22 +393,24 @@ store.settings ||= {};
 store.outbox ||= [];          // changes not yet on the Sheet
 store.deviceId ||= "dev-" + Math.random().toString(36).slice(2,8);
 if (!Array.isArray(store.settings.dates)){ const t=ymd(new Date()); store.settings.dates=[t, nextDate(t)]; }
+store.outbox = store.outbox.filter(o=>!(o.type==="person" && !o.opId && /^dev-/.test(o.id||"")));
+store.outbox.forEach((o,i)=>{ if(!o.opId) o.opId = "legacy-"+i+"-"+(o.u||0); });
 let conn = readLS(KEY+"-conn") || {url:SCRIPT_URL, key:""};
 if (SCRIPT_URL) conn.url = SCRIPT_URL;
 const save = () => writeLS(KEY, store);
 
 let opSeq = 0;
-function newOp(o){ return {...o, id: store.deviceId+"-"+Date.now()+"-"+(opSeq++), u: o.u || Date.now()}; }
+function newOp(o){ return {...o, opId: store.deviceId+"-"+Date.now()+"-"+(opSeq++), u: o.u || Date.now()}; }
 
 function applyOp(op){
   if (op.type==="mark"){
     const m = store.days[op.day] ||= {};
     if (op.s) m[op.pid] = {s:op.s, t:op.t, o:op.o||0, u:op.u}; else delete m[op.pid];
   } else if (op.type==="person"){
-    if (!store.people.some(p=>p.id===op.id)) store.people.push({id:op.id, name:op.name, phone:op.phone, email:op.email, walkIn:true});
+    if (!store.people.some(p=>p.id===op.id)) store.people.push({id:op.id, name:op.name, phone:op.phone, email:op.email, location:op.location||"", walkIn:true});
   } else if (op.type==="edit"){
     const p = store.people.find(x=>x.id===op.pid);
-    if (p){ p.name=op.name; p.phone=op.phone; p.email=op.email; }
+    if (p){ p.name=op.name; p.phone=op.phone; p.email=op.email; if (op.location) p.location=op.location; }
   } else if (op.type==="setting"){
     store.settings[op.k] = op.k==="dates" ? JSON.parse(op.v) : op.v;
   }
@@ -403,7 +426,7 @@ let syncing=false, syncError=null, syncTimer=null;
 function scheduleSync(ms){ clearTimeout(syncTimer); syncTimer=setTimeout(sync, ms); }
 
 function setServerState(d){
-  const people = d.candidates.map(c=>({id:"c"+c.sn, name:c.name, phone:c.phone, email:c.email}))
+  const people = d.candidates.map(c=>({id:"c"+c.sn, name:c.name, phone:c.phone, email:c.email, location:c.location||"Owerri"}))
     .concat(d.walkins.map(w=>({...w, walkIn:true})));
   store.people = people;
   const days = {};
@@ -424,13 +447,14 @@ async function sync(){
     const res = await fetch(conn.url, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify({key:conn.key, ops:sending})});
     const data = await res.json();
     if (!data.ok) throw new Error(data.error || "Sync failed");
-    const sent = new Set(sending.map(o=>o.id));
-    store.outbox = store.outbox.filter(o=>!sent.has(o.id));
+    const sent = new Set(sending.map(o=>o.opId));
+    store.outbox = store.outbox.filter(o=>!sent.has(o.opId));
     setServerState(data);
     store.outbox.forEach(applyOp);          // changes made while this sync was in flight
     store.lastSync = Date.now(); syncError = null;
     save();
     if (JSON.stringify([store.people, store.days, store.settings]) !== before){ applySettingsToUI(); drawSettings(); render(); }
+    if (!store.location && locations().length > 1 && !$("#locDlg").open && !$("#conn").open) openLoc();
   } catch(e){
     syncError = /access code/i.test(e.message) ? e.message : (navigator.onLine ? "Can’t reach the Sheet" : null);
     if (/access code/i.test(e.message)) openConn();
@@ -490,10 +514,41 @@ const dayIds = () => dates().map((_,i)=>"d"+(i+1));
 const dayName = id => "Day "+id.slice(1);
 const dateOf = id => dates()[+id.slice(1)-1];
 
-function people(){
-  let w = 0, nCand = store.people.filter(p=>!p.walkIn).length;
-  return store.people.map(p=>({...p, sn: p.walkIn ? nCand + (++w) : +p.id.slice(1)}));
+function allPeople(){
+  let w = 0, maxSn = store.people.reduce((m,p)=>p.walkIn?m:Math.max(m,+p.id.slice(1)),0);
+  return store.people.map(p=>({...p, location:p.location||"", sn: p.walkIn ? maxSn + (++w) : +p.id.slice(1)}));
 }
+function locations(){
+  return [...new Set(store.people.map(p=>p.location).filter(Boolean))].sort((a,b)=>a==="Owerri"?-1:b==="Owerri"?1:a.localeCompare(b));
+}
+const ALL_LOC = "__all__";
+function curLoc(){
+  const ls = locations();
+  if (store.location===ALL_LOC) return ALL_LOC;
+  if (store.location && ls.includes(store.location)) return store.location;
+  return ls.length===1 ? ls[0] : ALL_LOC;
+}
+const locLabel = l => l===ALL_LOC ? "All locations" : l;
+function people(){
+  const l = curLoc();
+  return l===ALL_LOC ? allPeople() : allPeople().filter(p=>p.location===l);
+}
+
+/* ---------- location picker ---------- */
+function openLoc(){
+  const ls = locations(), all = allPeople(), cur = curLoc();
+  $("#locList").innerHTML = ls.map(l=>`<button class="loc-opt" data-loc="${esc(l)}" aria-pressed="${l===cur}"><b>${esc(l)}</b><small>${all.filter(p=>p.location===l).length} people</small></button>`).join("")
+    + (ls.length>1 ? `<button class="loc-opt" data-loc="${ALL_LOC}" aria-pressed="${cur===ALL_LOC}"><b>All locations</b><small>${all.length} people · view everyone together</small></button>` : "");
+  if (!ls.length) $("#locList").innerHTML = `<p class="hint">Connect to the Sheet first to load locations.</p>`;
+  if (!$("#locDlg").open) $("#locDlg").showModal();
+}
+$("#locList").addEventListener("click", e=>{
+  const b = e.target.closest(".loc-opt"); if(!b) return;
+  store.location = b.dataset.loc; save();
+  $("#locDlg").close(); filter = mode==="out" && tab!=="all" ? "in" : "all"; render();
+  toast(`Showing ${locLabel(curLoc())}`);
+});
+$("#locBtn").addEventListener("click", openLoc);
 const marks = d => store.days[d] ||= {};
 const arrivedOn = (d,id) => { const s = marks(d)[id]?.s; return s==="present" || s==="late"; };
 const daysAttended = id => dayIds().filter(d=>arrivedOn(d,id)).length;
@@ -548,12 +603,12 @@ function setStatus(id, status, manual){
   const keep = isIn(prev) && (status==="present" || status==="late");
   queue(markOp(day, id, status, keep ? prev.t : 0, keep ? prev.o : 0));
   render(id);
-  const p = people().find(x=>x.id===id);
+  const p = allPeople().find(x=>x.id===id);
   lastUndo = ()=>{ queue(markOp(day, id, prev?.s, prev?.t, prev?.o)); render(); };
   toast(`${p.name} ${({present:"marked present",late:"marked late",absent:"marked absent"})[status]||"unmarked"} for ${dayName(day)}`);
 }
 function signOut(id){
-  const day = tab, r = marks(day)[id], p = people().find(x=>x.id===id);
+  const day = tab, r = marks(day)[id], p = allPeople().find(x=>x.id===id);
   if (!isIn(r)) return toast(`${p.name} hasn’t signed in for ${dayName(day)} yet`);
   const prev = {...r};
   if (r.o){ queue(markOp(day, id, r.s, r.t, 0)); lastUndo = ()=>{ queue(markOp(day,id,prev.s,prev.t,prev.o)); render(); }; render(id); return toast(`${p.name}’s sign-out removed`); }
@@ -633,7 +688,7 @@ function addDay(){
 function removeDay(){
   const N = dates().length; if (N<=1) return;
   const id = "d"+N, snap = {...marks(id)}, n = Object.keys(snap).length, lastDate = dates()[N-1];
-  if (n && !confirm(`${dayName(id)} has ${n} marks. Remove the day and its marks?`)) return;
+  if (n && !confirm(`${dayName(id)} has ${n} marks across all locations. Remove the day and its marks for everyone?`)) return;
   queue(Object.keys(snap).map(pid=>markOp(id,pid,"")));
   setDates(dates().slice(0,-1));
   if (tab===id) tab = "d"+(N-1);
@@ -658,6 +713,9 @@ function render(flashId){
   const isDay = tab!=="all";
 
   drawTabs(all);
+  const showLoc = locations().length>1;
+  $("#locBtn").hidden = !showLoc;
+  $("#locTxt").textContent = locLabel(curLoc());
   document.querySelectorAll("[data-day-only]").forEach(el=>el.hidden=!isDay);
   $("#modeSwitch").hidden = !isDay;
   $("#recentPanel").hidden = !isDay;
@@ -679,7 +737,7 @@ function render(flashId){
   } else if (!shown.length){
     list.innerHTML = `<div class="empty">${q?`No one matches “${esc(q)}”.`:"No one in this group yet."}${isDay&&q?`<br><button class="btn primary" style="margin-top:12px" onclick="openAdd()">Add as walk-in</button>`:""}</div>`;
   } else list.innerHTML = shown.map(p=>{
-    const sub = [`#${p.sn}`, hl(p.phone,q), p.email?hl(p.email,q):""].filter(Boolean).join("  ·  ");
+    const sub = [`#${p.sn}`, curLoc()===ALL_LOC && p.location ? `<span class="loc-tag">${esc(p.location)}</span>` : "", hl(p.phone,q), p.email?hl(p.email,q):""].filter(Boolean).join("  ·  ");
     const head = `<div class="av" style="background:${colorFor(p.name)}">${initials(p.name)}</div>`;
     const name = `<b>${hl(p.name,q)}${p.walkIn?'<span class="tag">walk-in</span>':""}<button class="edit" data-edit aria-label="Edit ${esc(p.name)}" title="Correct details"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></button></b>`;
     if (isDay){
@@ -744,7 +802,7 @@ $("#days").addEventListener("click", e=>{
 });
 $("#list").addEventListener("click", e=>{
   const go = e.target.closest("[data-go]");
-  if (go){ tab=go.dataset.go; filter="all"; $("#q").value = people().find(p=>p.id===go.closest(".row").dataset.id).name; render(); window.scrollTo({top:0,behavior:"smooth"}); return; }
+  if (go){ tab=go.dataset.go; filter="all"; $("#q").value = allPeople().find(p=>p.id===go.closest(".row").dataset.id).name; render(); window.scrollTo({top:0,behavior:"smooth"}); return; }
   if (e.target.closest("[data-edit]")) return openEdit(e.target.closest(".row").dataset.id);
   if (e.target.closest("[data-out]")) return signOut(e.target.closest(".row").dataset.id);
   const b = e.target.closest(".st"); if(!b) return;
@@ -788,9 +846,9 @@ $("#allOutBtn").addEventListener("click", ()=>{
   toast(`${ids.length} signed out`);
 });
 $("#resetBtn").addEventListener("click", ()=>{
-  const d = tab;
-  if(!confirm(`Clear every mark for ${dayName(d)} on all devices?`)) return;
-  const snap = {...marks(d)};
+  const d = tab, ids = new Set(people().map(p=>p.id)), where = curLoc()===ALL_LOC ? "all locations" : curLoc();
+  if(!confirm(`Clear every ${dayName(d)} mark for ${where}, on all devices?`)) return;
+  const snap = Object.fromEntries(Object.entries(marks(d)).filter(([pid])=>ids.has(pid)));
   queue(Object.keys(snap).map(pid=>markOp(d,pid,""))); render();
   lastUndo = ()=>{ queue(Object.entries(snap).map(([pid,r])=>markOp(d,pid,r.s,r.t,r.o))); render(); };
   toast(`${dayName(d)} cleared`);
@@ -802,23 +860,24 @@ function outText(d,id){ const r=marks(d)[id]; return r && r.s!=="absent" && r.o 
 const short = {Present:"P", Late:"L", Absent:"A", "Not marked":"–"};
 $("#csvBtn").addEventListener("click", ()=>{
   const ids = dayIds(), N = ids.length;
-  const head = ["S/N","Name","Phone","Email", ...ids.flatMap(d=>[`${dayName(d)} (${dateOf(d)})`,`${dayName(d)} in`,`${dayName(d)} out`]), "Days attended","Completed all days","Walk-in"];
-  const rows = people().map(p=>[p.sn,p.name,p.phone,p.email, ...ids.flatMap(d=>[statusText(d,p.id),timeText(d,p.id),outText(d,p.id)]), `${daysAttended(p.id)} of ${N}`, daysAttended(p.id)===N?"Yes":"No", p.walkIn?"Yes":""]);
+  const head = ["S/N","Name","Location","Phone","Email", ...ids.flatMap(d=>[`${dayName(d)} (${dateOf(d)})`,`${dayName(d)} in`,`${dayName(d)} out`]), "Days attended","Completed all days","Walk-in"];
+  const rows = people().map(p=>[p.sn,p.name,p.location,p.phone,p.email, ...ids.flatMap(d=>[statusText(d,p.id),timeText(d,p.id),outText(d,p.id)]), `${daysAttended(p.id)} of ${N}`, daysAttended(p.id)===N?"Yes":"No", p.walkIn?"Yes":""]);
   const csv = [head,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\r\n");
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob(["\ufeff"+csv],{type:"text/csv"}));
-  a.download = `bravo-training-attendance.csv`; a.click();
+  a.download = `bravo-attendance-${curLoc()===ALL_LOC?"all-locations":curLoc().toLowerCase().replace(/\W+/g,"-")}.csv`; a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 });
 $("#printBtn").addEventListener("click", ()=>{
   const list = people(), ids = dayIds(), N = ids.length;
-  const title = tab==="all" ? `All ${N} days` : `${dayName(tab)} · ${fmtDate(dateOf(tab))}`;
+  const title = `${locLabel(curLoc())} · ` + (tab==="all" ? `All ${N} days` : `${dayName(tab)} · ${fmtDate(dateOf(tab))}`);
+  const showL = curLoc()===ALL_LOC;
   const headRow = tab==="all"
-    ? `<th>S/N</th><th>Name</th><th>Phone</th>${ids.map(d=>`<th>D${d.slice(1)}</th>`).join("")}<th>Days</th>`
-    : "<th>S/N</th><th>Name</th><th>Phone</th><th>Status</th><th>In</th><th>Out</th><th>Signature</th>";
+    ? `<th>S/N</th><th>Name</th>${showL?"<th>Location</th>":""}<th>Phone</th>${ids.map(d=>`<th>D${d.slice(1)}</th>`).join("")}<th>Days</th>`
+    : `<th>S/N</th><th>Name</th>${showL?"<th>Location</th>":""}<th>Phone</th><th>Status</th><th>In</th><th>Out</th><th>Signature</th>`;
   const body = list.map(p=> tab==="all"
-    ? `<tr><td>${p.sn}</td><td>${esc(p.name)}</td><td>${esc(p.phone)}</td>${ids.map(d=>`<td>${short[statusText(d,p.id)]}</td>`).join("")}<td>${daysAttended(p.id)}/${N}</td></tr>`
-    : `<tr><td>${p.sn}</td><td>${esc(p.name)}${p.walkIn?" (walk-in)":""}</td><td>${esc(p.phone)}</td><td>${statusText(tab,p.id)}</td><td>${timeText(tab,p.id)}</td><td>${outText(tab,p.id)}</td><td></td></tr>`).join("");
+    ? `<tr><td>${p.sn}</td><td>${esc(p.name)}</td>${showL?`<td>${esc(p.location)}</td>`:""}<td>${esc(p.phone)}</td>${ids.map(d=>`<td>${short[statusText(d,p.id)]}</td>`).join("")}<td>${daysAttended(p.id)}/${N}</td></tr>`
+    : `<tr><td>${p.sn}</td><td>${esc(p.name)}${p.walkIn?" (walk-in)":""}</td>${showL?`<td>${esc(p.location)}</td>`:""}<td>${esc(p.phone)}</td><td>${statusText(tab,p.id)}</td><td>${timeText(tab,p.id)}</td><td>${outText(tab,p.id)}</td><td></td></tr>`).join("");
   $("#printArea").innerHTML = `<div class="ph"><img src="${LOGO}" alt=""><div><h2 style="margin:0">${esc($("#trainingName").value)}</h2><p style="margin:2px 0 10px">${title} · ${$("#leg1").textContent}${tab==="all"?" · P present, L late, A absent":""}</p></div></div>
     <table><thead><tr>${headRow}</tr></thead><tbody>${body}</tbody></table>`;
   window.print();
@@ -829,6 +888,7 @@ function openAdd(){
   $("#wName").value = /\d/.test(q) ? "" : q;
   $("#wPhone").value = /^\d+$/.test(q) ? q : "";
   $("#wEmail").value = "";
+  fillLocSelect($("#wLoc"), curLoc()===ALL_LOC ? "" : curLoc());
   $("#dlg").showModal();
 }
 $("#addBtn").addEventListener("click", openAdd);
@@ -836,25 +896,32 @@ $("#dlg").addEventListener("close", ()=>{
   if ($("#dlg").returnValue!=="ok") return;
   const name = $("#wName").value.trim(); if(!name) return;
   const id = "w-"+store.deviceId+"-"+Date.now();
-  queue({type:"person", id, name, phone:$("#wPhone").value.trim(), email:$("#wEmail").value.trim()});
+  queue({type:"person", id, name, phone:$("#wPhone").value.trim(), email:$("#wEmail").value.trim(), location:$("#wLoc").value});
   $("#q").value=""; setStatus(id,"present");
 });
 
+function fillLocSelect(sel, value){
+  const ls = locations();
+  sel.innerHTML = (value ? "" : `<option value="" disabled selected>Choose a location</option>`) + ls.map(l=>`<option ${l===value?"selected":""}>${esc(l)}</option>`).join("");
+  sel.closest("label").hidden = ls.length<2;
+  sel.required = ls.length>1;
+}
 let editing = null;
 function openEdit(id){
-  const p = people().find(x=>x.id===id); if(!p) return;
+  const p = allPeople().find(x=>x.id===id); if(!p) return;
   editing = id;
   $("#eTitle").textContent = `Correct details · #${p.sn}`;
   $("#eName").value = p.name; $("#ePhone").value = p.phone||""; $("#eEmail").value = p.email||"";
+  fillLocSelect($("#eLoc"), p.location);
   $("#edit").showModal(); $("#eName").focus();
 }
 $("#edit").addEventListener("close", ()=>{
   if ($("#edit").returnValue!=="ok" || !editing) return;
-  const p = people().find(x=>x.id===editing); const id = editing; editing = null;
-  const next = {name:$("#eName").value.trim().replace(/\s+/g," "), phone:$("#ePhone").value.trim(), email:$("#eEmail").value.trim()};
+  const p = allPeople().find(x=>x.id===editing); const id = editing; editing = null;
+  const next = {name:$("#eName").value.trim().replace(/\s+/g," "), phone:$("#ePhone").value.trim(), email:$("#eEmail").value.trim(), location:$("#eLoc").value || p.location};
   if (!next.name) return;
-  if (next.name===p.name && next.phone===(p.phone||"") && next.email===(p.email||"")) return;
-  const prev = {name:p.name, phone:p.phone||"", email:p.email||""};
+  if (next.name===p.name && next.phone===(p.phone||"") && next.email===(p.email||"") && next.location===p.location) return;
+  const prev = {name:p.name, phone:p.phone||"", email:p.email||"", location:p.location};
   queue({type:"edit", pid:id, ...next}); render(id);
   lastUndo = ()=>{ queue({type:"edit", pid:id, ...prev}); render(); };
   toast(`Details updated for ${next.name}`);
